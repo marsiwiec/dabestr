@@ -232,12 +232,19 @@ load <- function(
 
   ## Check to ensure control & treatment groups have the same sample size if is_paired is TRUE
   if (is_paired) {
-    if (length(unique(Ns$n)) > 1) {
-      cli::cli_abort(c("{.field data} is paired, as indicated by {.field paired} but size of control and treatment groups are not equal.",
+    for(i in idx) {
+      unlisted_pair <- unlist(i)
+      filter_df <- data %>%
+        dplyr::filter(!!enquo_x %in% unlisted_pair)
+      check_ns <- filter_df %>%
+        dplyr::count(!!enquo_x)
+      if (length(unique(check_ns$n)) > 1) {
+        cli::cli_abort(c("{.field data} is paired, as indicated by {.field paired} but size of control and treatment groups are not equal.",
         "x" = "Ensure that the size of control and treatment groups are the same for paired comparisons."
       ))
     }
   }
+}
 
   # Extending ylim for plotting
   ylim[1] <- ylim[1] - (ylim[2] - ylim[1]) / 25
